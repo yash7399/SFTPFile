@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="INFO">
+    <Properties>
+        <Property name="logPath">C:\Users\int30\Desktop\Vipin\Logs</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout>
+                <Pattern>%d [%t] %-5level %c{1} - %msg%n</Pattern>
+            </PatternLayout>
+        </Console>
+
+        <!-- RollingFile without fileName: write directly to dated files -->
+        <RollingFile name="DailyDatedFile"
+                     filePattern="${logPath}/logs/%d{dd-MM-yyyy}/Application.log"
+                     append="true">
+            <PatternLayout>
+                <Pattern>%d [%t] %-5level %c{1} - %msg%n</Pattern>
+            </PatternLayout>
+
+            <Policies>
+                <!-- New file each day -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <!-- Optional: also roll by size to create -1, -2, etc. -->
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+
+            <!-- This strategy makes Log4j2 write directly to the filePattern -->
+            <DirectWriteRolloverStrategy maxFiles="30"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.example.sft" level="info" additivity="false">
+            <AppenderRef ref="DailyDatedFile"/>
+        </Logger>
+
+          <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="DailyDatedFile"/>
+        </Root>
+
+
+    </Loggers>
+</Configuration>

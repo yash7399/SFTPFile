@@ -1,0 +1,25 @@
+{
+
+	"sftpserver":{
+	
+		"01":{
+				"ip":"59.160.38.22",
+				"port":6010,
+				"user":"NCDEXUSER3",
+				"privateKey":"C:\\Users\\int30\\.ssh\\id_rsa_old"
+			},
+		"02":{
+				"ip":"59.160.38.22",
+				"port":6010,
+				"user":"NCDEXUSER3",
+				"privateKey":"C:\\Users\\int30\\.ssh\\id_rsa_old"
+		
+			}
+			
+	
+	}
+
+
+
+
+}

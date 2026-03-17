@@ -1,0 +1,593 @@
+{
+
+	"department":{
+	"Enforcement":{
+        "01": [
+  	{
+      "filename": "AdvertisementMis_DDMMYYYY.csv",
+      "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ADVERTISEMENT",
+      "share": "nseit",
+      "destination": "/yash shukla/File_Transfer_Test/Enforcement",
+      "time": 1
+    },
+  	 {
+      "filename": "AdvertisementMis_DDMMYYYY_N.zip",
+      "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ADVERTISEMENT",
+      "share": "nseit",
+      "destination": "/yash shukla/File_Transfer_Test/Enforcement",
+      "time": 1
+    	},
+    {
+      "filename": "AdvertisementMis_DDMMYYYY_NN.csv",
+      "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ADVERTISEMENT",
+      "share": "nseit",
+      "destination": "/yash shukla/File_Transfer_Test/Enforcement",
+      "time": 1
+    }
+  	]
+    },
+	
+  	"CSG":{
+        "01":[
+  	{
+      "filename": "Insurance_DDMMYYYY_N.zip",
+      "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/Insurance",
+      "share": "nseit",
+      "destination": "/yash shukla/File_Transfer_Test/CSG",
+      "time": 1
+    },
+  	 {
+      "filename": "InsuranceMis_DDMMYYYY.csv",
+      "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/Insurance",
+      "share": "nseit",
+      "destination": "/yash shukla/File_Transfer_Test/CSG",
+      "time": 1
+    	},
+    {
+      "filename": "Insurance_DDMMYYYY_NN.csv",
+      "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/Insurance",
+      "share": "nseit",
+      "destination": "/yash shukla/File_Transfer_Test/CSG",
+      "time": 1
+    }
+  	
+  	]
+      },
+		"Inspection":{
+		
+			"01":[
+  {
+    "filename": "MIS_Bank_Account_NSE_NCDEX_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Bank_Accounts",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "Bank_Account_NSE_NCDEX_DDMMYYYY.zip",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Bank_Accounts",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  
+  {
+    "filename": "AIMLMis_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/AIML",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "AIML_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/AIML",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "MIS_Demat_Account_NSE_NCDEX_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Demat_Accounts",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "Demat_Account_NSE_NCDEX_DDMMYYYY.zip",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Demat_Accounts",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "HOLDING_STATEMENT_DECLARATION_NSE_NCDEX_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Holding_Statement",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "MIS_HOLDING_STATEMENT_NSE_NCDEX_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Holding_Statement",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "HOLDING_STATEMENT_NSE_NCDEX_DDMMYYYY_NN.zip",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Holding_Statement",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "MIS_QSB_NSE_NCDEX_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Qualified_Stock_Broker",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "QSB_NSE_NCDEX_DDMMYYYY_NN.zip",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Qualified_Stock_Broker",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "RunningAccountSettlement_Declaration_NSE_NCDEX_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/UCC_Wise_Settlement",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "MIS_UCC_Settlement_NSE_NCDEX_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/UCC_Wise_Settlement",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "UCC_Settlement_NSE_NCDEX_DDMMYYYY_NN.zip",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/UCC_Wise_Settlement",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 1
+  },
+  {
+    "filename": "NCCL_NSE_SEGREGATIONREPORT_DDMMYYYY.csv.gz",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 7
+  },
+  {
+    "filename": "NCCL_NSE_SEGREGATIONREPORT_DDMMYYYY_NN.csv.gz",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 7
+  },
+  {
+    "filename": "MCXCCL_NSE_SEGREGATIONREPORT_DDMMYYYY.csv.gz",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 7
+  },
+  {
+    "filename": "MCXCCL_NSE_SEGREGATIONREPORT_DDMMYYYY_NN.csv.gz",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 7
+  },
+  {
+    "filename": "NCL_NSE_SEGREGATIONREPORT_DDMMYYYY.csv.gz",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 7
+  },
+  {
+    "filename": "NCL_NSE_SEGREGATIONREPORT_DDMMYYYY_NN.csv.gz",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 7
+  },
+  {
+    "filename": "ICCL_NSE_SEGREGATIONREPORT_DDMMYYYY.csv.gz",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 7
+  },
+  {
+    "filename": "ICCL_NSE_SEGREGATIONREPORT_DDMMYYYY_NN.csv.gz",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 7
+  },
+  {
+    "filename": "NCCL_NSE_CC_TMCMCOLL_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collateral",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 5
+  },
+  {
+    "filename": "MCXCCL_NSE_CC_TMCMCOLL_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collateral",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 5
+  },
+  {
+    "filename": "ICCL_NSE_CC_TMCMCOLL_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collateral",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 5
+  },
+  {
+    "filename": "NCCL_NSE_TMMARGINOBLG_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collateral",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 15
+  },
+  {
+    "filename": "MCXCCL_NSE_TMMARGINOBLG_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collateral",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 15
+  },
+  {
+    "filename": "ICCL_NSE_TMMARGINOBLG_DDMMYYYY.csv",
+    "source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collateral",
+    "share": "nseit",
+    "destination": "/yash shukla/File_Transfer_Test/Inspection",
+    "time": 15
+  }
+]
+		},
+
+      "Membership":{
+          "01":[
+        {
+          "filename": "Annual_Returns_MIS_DDMMYYYY.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ANNUAL_RETURN",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "Annual_Returns_DDMMYYYY_NN.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ANNUAL_RETURN",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "Annual_Returns_CorporateDDMMYYYY_NN.xlsx",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ANNUAL_RETURN",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "KMPMis_DDMMYYYY.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/KMP",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "KMP_DDMMYYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/KMP",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "KMP_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/KMP",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "CompOfficerMis_DDMMYYYY.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/COMPLIANCE_OFFICER",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "CompOfficer_DDMMYYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/COMPLIANCE_OFFICER",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "CompOfficer_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/COMPLIANCE_OFFICER",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "ChangeNameMis_DDMMYYYY.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/CHANGE_NAME",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "ChangeName_DDMMYYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/CHANGE_NAME",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "Document_Repository_MIS_DDMMYYYY.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "Director_Change_DD-MON-YYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "Director_Change_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        
+      
+        {
+          "filename": "Demergers_DD-MON-YYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "Demergers_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Shareholding_change_DD-MON-YYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Shareholding_change_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        
+      
+        {
+          "filename": "Mergers_DD-MON-YYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Mergers_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        
+      
+        {
+          "filename": "Post_Imp_Director_Change_DD-MON-YYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Post_Imp_Director_Change_DDMMYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        
+      
+        {
+          "filename": "Post_Imp_Shareholding_change_DD-MON-YYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Post_Imp_Shareholding_change_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        
+      
+        {
+          "filename": "Change_in_Control_DD-MON-YYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Change_in_Control_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+      
+        {
+          "filename": "Constitution_Change_wo_control_DD-MON-YYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Constitution_Change_wo_control_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        
+      
+        {
+          "filename": "Transfers_DD-MON-YYYY_NN.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Business_Transfer_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/DOCUMENT_REPOSITORY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "CorresAddressMis_DDMMYYYY.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/CORR_OFF",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "CorresAddress_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/CORR_OFF",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "RegisteredOffMis_DDMMYYYY.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/REGISTERED_OFFICE",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "RegisteredOff_DDMMYYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/REGISTERED_OFFICE",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "RegisteredOff_DDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/REGISTERED_OFFICE",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "Annual_Returns_FirmDDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ANNUAL_RETURN",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        
+      
+        {
+          "filename": "Annual_Returns_LLPDDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ANNUAL_RETURN",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        
+      
+        {
+          "filename": "Annual_Returns_BankDDMMYYYY_NN.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/ANNUAL_RETURN",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "HalfYearlyMis_DDMMYYYY.csv",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/HALF_YEARLY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+      
+        {
+          "filename": "HalfYearly_DDMMYYYY_N.zip",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/HALF_YEARLY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        },
+        {
+          "filename": "HalfYearly_DDMMYYYY_NN.xlsx",
+          "source": "/olsapplv2/mnt/appln/COMPLIANCE/NCDEX/Output_Folder/HALF_YEARLY",
+          "share": "nseit",
+          "destination": "/yash shukla/File_Transfer_Test/Membership",
+          "time": 1
+        }
+]
+      }
+
+  	
+	}
+}

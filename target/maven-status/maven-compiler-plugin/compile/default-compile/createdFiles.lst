@@ -1,0 +1,16 @@
+com\ncdex\filetransfer\config\ServerDetails.class
+com\ncdex\filetransfer\config\FileConfig.class
+com\ncdex\filetransfer\FileTransferService.class
+com\ncdex\filetransfer\connections\NASConnection.class
+com\ncdex\filetransfer\utils\Prop.class
+com\ncdex\filetransfer\emails\Emails.class
+com\ncdex\filetransfer\utils\Utils.class
+com\ncdex\filetransfer\FileTransferApplication.class
+com\ncdex\filetransfer\utils\Trigger.class
+com\ncdex\filetransfer\templates\Templates.class
+com\ncdex\filetransfer\config\SFTPServer.class
+com\ncdex\filetransfer\config\DepartmentConfig.class
+com\ncdex\filetransfer\constants\GlobalConstants.class
+com\ncdex\filetransfer\config\ConnectionConfig.class
+com\ncdex\filetransfer\connections\SFTPConnection.class
+com\ncdex\filetransfer\ApplicationRunner.class

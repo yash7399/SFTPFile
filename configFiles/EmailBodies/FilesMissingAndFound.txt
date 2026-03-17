@@ -1,0 +1,18 @@
+Dear Member,
+
+This is to inform you that files for the ${batchDate} are copied as mentioned below.
+
+The list of files is mentioned below:
+
+${successFiles}
+
+This is to inform you that files for the ${batchDate}, could not be copied due to files not present.
+
+The list of files is mentioned below:
+
+${failureFiles}
+
+Regards,
+Dev Team
+
+

@@ -1,0 +1,14 @@
+{
+	"department": {
+		"Inspection": {
+			"01": [
+				{
+					"filename": "NCL_NSE_SEGREGATIONREPORT_DDMMYYYY_00.csv.gz",
+					"source": "/olsapplv2/mnt/appln/Inspection/NCDEX/Output_Folder/Collat_Segregation",
+					"share": "nseit",
+					"destination": "/yash shukla/File_Transfer_Test/Inspection",
+					"time": 5
+				}
+			]
+		}	}
+}
