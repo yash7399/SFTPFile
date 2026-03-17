@@ -115,86 +115,75 @@ public class FileTransferService {
     // CORE COPY: SFTP -> LOCAL TEMP -> MOUNTED NAS (with SHA-256 verify)
     // -------------------------------------------------------------------------
 
-    private void copyFile(ChannelSftp sftp, String fileName, String sftpPath,
-                          String destSubFolder, String dept,
-                          Map<String, List<String>> missing,
-                          Map<String, List<String>> success) throws Exception {
+   private void copyFile(ChannelSftp sftp, String fileName, String sftpPath,
+                      String destSubFolder, String dept,
+                      Map<String, List<String>> missing,
+                      Map<String, List<String>> success) throws Exception {
 
-        Path tempFile  = Paths.get(GlobalConstants.local_folder_temporary, fileName);
-        Path nasDir    = Paths.get(MOUNT_POINT, destSubFolder);
-        Path nasFile   = nasDir.resolve(fileName);
+    Path tempFile = Paths.get(GlobalConstants.local_folder_temporary, fileName);
+    Path nasDir   = Paths.get(MOUNT_POINT, destSubFolder);
+    Path nasFile  = nasDir.resolve(fileName);
 
-        String sourceHash = null;
-        String nasHash    = null;
+    String sourceHash = null;
+    String nasHash    = null;
 
-        try {
-            // Create local temp dir if not exists
-            Files.createDirectories(Paths.get(GlobalConstants.local_folder_temporary));
+    try {
+        // Create local temp dir if not exists
+        Files.createDirectories(Paths.get(GlobalConstants.local_folder_temporary));
 
-            // Create destination dir on NAS if not exists
-            Files.createDirectories(nasDir);
+        // Create destination dir on NAS if not exists
+        Files.createDirectories(nasDir);
 
-            // Step 1: SFTP -> local temp
-            log.info("Downloading {} from SFTP to temp", fileName);
-            MessageDigest mdSource = MessageDigest.getInstance("SHA-256");
-            try (InputStream in          = sftp.get(sftpPath);
-                 DigestInputStream dis   = new DigestInputStream(in, mdSource);
-                 FileOutputStream fos    = new FileOutputStream(tempFile.toFile())) {
+        // Step 1: SFTP -> local temp
+        log.info("Downloading {} from SFTP to temp", fileName);
+        MessageDigest mdSource = MessageDigest.getInstance("SHA-256");
+        try (InputStream in        = sftp.get(sftpPath);
+             DigestInputStream dis = new DigestInputStream(in, mdSource);
+             FileOutputStream fos  = new FileOutputStream(tempFile.toFile())) {
 
-                byte[] buffer = new byte[1024 * 1024]; // 1MB buffer
-                int read;
-                while ((read = dis.read(buffer)) != -1) {
-                    fos.write(buffer, 0, read);
-                }
+            byte[] buffer = new byte[1024 * 1024]; // 1MB buffer
+            int read;
+            while ((read = dis.read(buffer)) != -1) {
+                fos.write(buffer, 0, read);
             }
             sourceHash = bytesToHex(mdSource.digest());
-            log.info("Downloaded {} to temp. Hash: {}", fileName, sourceHash);
-
-            // Step 2: local temp -> NAS
-            log.info("Copying {} from temp to NAS: {}", fileName, nasFile);
-            MessageDigest mdNas = MessageDigest.getInstance("SHA-256");
-            try (FileInputStream fis  = new FileInputStream(tempFile.toFile());
-                 FileOutputStream fos = new FileOutputStream(nasFile.toFile())) {
-
-                byte[] buffer = new byte[1024 * 1024];
-                int read;
-                while ((read = fis.read(buffer)) != -1) {
-                    fos.write(buffer, 0, read);
-                    mdNas.update(buffer, 0, read);
-                }
-            }
-            nasHash = bytesToHex(mdNas.digest());
-
-            // Step 3: Verify checksum
-            if (!sourceHash.equalsIgnoreCase(nasHash)) {
-                // Hashes don't match = this file is corrupt, file-level issue
-                log.error("Checksum mismatch for {}. SFTP: {} | NAS: {}", fileName, sourceHash, nasHash);
-                safeDelete(nasFile); // remove corrupt file from NAS
-                missing.computeIfAbsent(dept, k -> new ArrayList<>()).add(fileName);
-                return; // skip, don't throw
-            }
-
-            log.info("Checksum verified. Transfer complete: {}", fileName);
-            success.computeIfAbsent(dept, k -> new ArrayList<>()).add(fileName);
-
-        } catch (SftpException e) {
-            // SFTP read error = connection-level
-            log.error("SFTP error while transferring {}: {}", fileName, e.getMessage());
-            safeDelete(nasFile);
-            throw e; // bubble up to ApplicationRunner
-
-        } catch (IOException e) {
-            // Could be NAS write issue or local disk issue = connection-level
-            log.error("IO error while transferring {}: {}", fileName, e.getMessage());
-            safeDelete(nasFile);
-            throw e; // bubble up to ApplicationRunner
-
-        } finally {
-            // Always clean up local temp file
-            safeDelete(tempFile);
         }
-    }
+        log.info("Downloaded {} to temp. Hash: {}", fileName, sourceHash);
 
+        // Step 2: local temp -> NAS (Replacing Robocopy with Native Java Copy)
+        log.info("Copying {} from temp to NAS: {}", fileName, nasFile);
+        
+        // StandardCopyOption.REPLACE_EXISTING behaves like Robocopy's overwrite
+        Files.copy(tempFile, nasFile, StandardCopyOption.REPLACE_EXISTING);
+
+        // Step 3: Verify checksum (Generate hash for the file now on the NAS)
+        MessageDigest mdNas = MessageDigest.getInstance("SHA-256");
+        try (InputStream is    = Files.newInputStream(nasFile);
+             DigestInputStream dis = new DigestInputStream(is, mdNas)) {
+            byte[] buffer = new byte[1024 * 1024];
+            while (dis.read(buffer) != -1) ; // Read the file to generate hash
+            nasHash = bytesToHex(mdNas.digest());
+        }
+
+        if (!sourceHash.equalsIgnoreCase(nasHash)) {
+            log.error("Checksum mismatch for {}. SFTP: {} | NAS: {}", fileName, sourceHash, nasHash);
+            safeDelete(nasFile); 
+            missing.computeIfAbsent(dept, k -> new ArrayList<>()).add(fileName);
+            return; 
+        }
+
+        log.info("Checksum verified. Transfer complete: {}", fileName);
+        success.computeIfAbsent(dept, k -> new ArrayList<>()).add(fileName);
+
+    } catch (SftpException | IOException e) {
+        log.error("Error while transferring {}: {}", fileName, e.getMessage());
+        safeDelete(nasFile);
+        throw e; 
+
+    } finally {
+        safeDelete(tempFile);
+    }
+}
     // -------------------------------------------------------------------------
     // HELPERS
     // -------------------------------------------------------------------------
