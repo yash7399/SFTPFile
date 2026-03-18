@@ -25,17 +25,14 @@ public class FileTransferService {
 
     private static final Logger log = LogManager.getLogger(FileTransferService.class);
 
-    // NAS is already mounted at this drive letter on Windows
-    private static final String MOUNT_POINT = "Z:";
-
-    // -------------------------------------------------------------------------
-    // ENTRY POINT
-    // -------------------------------------------------------------------------
+    private static String MOUNT_POINT = null;
 
     public void transfer(String serverCode, ChannelSftp sftp, String fileName,
                          String sourcePath, String destinationPath, String department,
                          Map<String, List<String>> missingFiles,
                          Map<String, List<String>> transferedFiles) throws Exception {
+    	
+    	MOUNT_POINT=GlobalConstants.mount_point;
 
         if (fileName.contains("N.")) {
             transferMultipleFiles(sftp, fileName, sourcePath, destinationPath,
@@ -45,10 +42,6 @@ public class FileTransferService {
                     department, missingFiles, transferedFiles);
         }
     }
-
-    // -------------------------------------------------------------------------
-    // SINGLE FILE
-    // -------------------------------------------------------------------------
 
     private void transferSingleFile(ChannelSftp sftp, String fileName,
                                     String sourcePath, String destPath, String dept,
@@ -60,19 +53,14 @@ public class FileTransferService {
         // Check if file exists on SFTP — file-level if missing
         try {
             sftp.stat(sftpFilePath);
-        } catch (SftpException e) {
-            log.warn("File not found on SFTP, skipping: {}", sftpFilePath);
+            copyFile(sftp, fileName, sftpFilePath, destPath, dept, missing, success);
+        } catch (Exception e) {
+            log.warn("{}: File cannot be transfered", sftpFilePath);
             missing.computeIfAbsent(dept, k -> new ArrayList<>()).add(fileName);
-            return; // skip this file, no exception thrown
+            throw e;
         }
 
-        // Transfer the file
-        copyFile(sftp, fileName, sftpFilePath, destPath, dept, missing, success);
     }
-
-    // -------------------------------------------------------------------------
-    // MULTIPLE FILES (pattern-based)
-    // -------------------------------------------------------------------------
 
     private void transferMultipleFiles(ChannelSftp sftp, String template,
                                        String sourcePath, String destPath, String dept,
@@ -93,7 +81,6 @@ public class FileTransferService {
         try {
             files = sftp.ls(listPath);
         } catch (SftpException e) {
-            // Can't list directory = connection issue
             log.error("Cannot list SFTP path {}: {}", listPath, e.getMessage());
             throw e;
         }
@@ -107,31 +94,40 @@ public class FileTransferService {
         for (ChannelSftp.LsEntry entry : files) {
             if (!pattern.matcher(entry.getFilename()).matches()) continue;
             String remoteFile = entry.getFilename();
-            copyFile(sftp, remoteFile, sourcePath + "/" + remoteFile, destPath, dept, missing, success);
+            try {
+            	copyFile(sftp, remoteFile, sourcePath + "/" + remoteFile, destPath, dept, missing, success);
+            }
+            catch (Exception e) {
+                log.warn("{}: File cannot be transfered", remoteFile);
+                missing.computeIfAbsent(dept, k -> new ArrayList<>()).add(remoteFile);
+                throw e;
+            }
+            
         }
     }
 
-    // -------------------------------------------------------------------------
-    // CORE COPY: SFTP -> LOCAL TEMP -> MOUNTED NAS (with SHA-256 verify)
-    // -------------------------------------------------------------------------
-
+  
    private void copyFile(ChannelSftp sftp, String fileName, String sftpPath,
                       String destSubFolder, String dept,
                       Map<String, List<String>> missing,
                       Map<String, List<String>> success) throws Exception {
-
+	   
     Path tempFile = Paths.get(GlobalConstants.local_folder_temporary, fileName);
     Path nasDir   = Paths.get(MOUNT_POINT, destSubFolder);
     Path nasFile  = nasDir.resolve(fileName);
+    
+    Path rootMount = Paths.get(MOUNT_POINT);
+    if (!Files.exists(rootMount) || !Files.isDirectory(rootMount)) {
+        log.error("CRITICAL: Mount point {} is missing or not a directory!", MOUNT_POINT);
+        emails.connectionIssue();
+    }
 
     String sourceHash = null;
     String nasHash    = null;
 
     try {
-        // Create local temp dir if not exists
         Files.createDirectories(Paths.get(GlobalConstants.local_folder_temporary));
 
-        // Create destination dir on NAS if not exists
         Files.createDirectories(nasDir);
 
         // Step 1: SFTP -> local temp
@@ -141,7 +137,7 @@ public class FileTransferService {
              DigestInputStream dis = new DigestInputStream(in, mdSource);
              FileOutputStream fos  = new FileOutputStream(tempFile.toFile())) {
 
-            byte[] buffer = new byte[1024 * 1024]; // 1MB buffer
+            byte[] buffer = new byte[1024 * 1024]; 
             int read;
             while ((read = dis.read(buffer)) != -1) {
                 fos.write(buffer, 0, read);
@@ -150,24 +146,45 @@ public class FileTransferService {
         }
         log.info("Downloaded {} to temp. Hash: {}", fileName, sourceHash);
 
-        // Step 2: local temp -> NAS (Replacing Robocopy with Native Java Copy)
+        // Step 2: local temp -> NAS 
         log.info("Copying {} from temp to NAS: {}", fileName, nasFile);
-        
-        // StandardCopyOption.REPLACE_EXISTING behaves like Robocopy's overwrite
-        Files.copy(tempFile, nasFile, StandardCopyOption.REPLACE_EXISTING);
 
+        try {
+            Files.createDirectories(nasDir); 
+
+            Files.copy(tempFile, nasFile, StandardCopyOption.REPLACE_EXISTING);
+            
+        } catch (NoSuchFileException e) {
+            log.error("NAS Mount Point not found or inaccessible: {}", nasDir);
+            emails.connectionIssue();
+        } catch (AccessDeniedException e) {
+            log.error("Permission denied on NAS directory: {}", nasDir);
+            throw new IOException("Check Linux permissions (chmod/chown) for " + nasDir, e);
+        } catch (FileAlreadyExistsException e) {
+            log.error("File already exists and cannot be overwritten: {}", nasFile);
+            throw e;
+        } catch (IOException e) {
+            if (e.getMessage() != null && e.getMessage().contains("No space left on device")) {
+                log.error("NAS disk is full: {}", MOUNT_POINT);
+            } else {
+                log.error("Generic IO error during NAS copy: {}", e.getMessage());
+            }
+            emails.connectionIssue();
+        }
+        
         // Step 3: Verify checksum (Generate hash for the file now on the NAS)
         MessageDigest mdNas = MessageDigest.getInstance("SHA-256");
         try (InputStream is    = Files.newInputStream(nasFile);
              DigestInputStream dis = new DigestInputStream(is, mdNas)) {
             byte[] buffer = new byte[1024 * 1024];
-            while (dis.read(buffer) != -1) ; // Read the file to generate hash
+            while (dis.read(buffer) != -1) ;
             nasHash = bytesToHex(mdNas.digest());
         }
 
         if (!sourceHash.equalsIgnoreCase(nasHash)) {
             log.error("Checksum mismatch for {}. SFTP: {} | NAS: {}", fileName, sourceHash, nasHash);
             safeDelete(nasFile); 
+            safeDelete(tempFile);
             missing.computeIfAbsent(dept, k -> new ArrayList<>()).add(fileName);
             return; 
         }
@@ -175,19 +192,25 @@ public class FileTransferService {
         log.info("Checksum verified. Transfer complete: {}", fileName);
         success.computeIfAbsent(dept, k -> new ArrayList<>()).add(fileName);
 
-    } catch (SftpException | IOException e) {
-        log.error("Error while transferring {}: {}", fileName, e.getMessage());
-        safeDelete(nasFile);
-        throw e; 
+    } catch (SftpException e) {
+    	safeDelete(tempFile);
+		
+		if (e.id == ChannelSftp.SSH_FX_PERMISSION_DENIED) {
+			System.out.println("Error in transfering file : " + e.getMessage());
+			log.error("Error in transfering file : " + e.getMessage());
+			throw e;
+		}
+		else {
+			log.error(e);
+			throw e;
+		}
 
     } finally {
         safeDelete(tempFile);
     }
 }
-    // -------------------------------------------------------------------------
-    // HELPERS
-    // -------------------------------------------------------------------------
-
+   
+   
     private void safeDelete(Path path) {
         try {
             if (path != null) Files.deleteIfExists(path);

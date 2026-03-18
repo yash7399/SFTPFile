@@ -35,6 +35,7 @@ public class GlobalConstants {
 	    public static String emailConfigPath = getProperty("path.emailConfig");
 	    public static String local_folder_temporary = getProperty("path.local_folder_temporary");
 	    public static String log4j2 = getProperty("path.log4j2");
+	    public static String mount_point = getProperty("mount_point");
 	    
 	    public static String batchDate=ApplicationRunner.getBatchDate();
 	    

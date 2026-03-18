@@ -37,13 +37,8 @@ public class Emails {
 					String toEmail = getProperty("email." + depart);
 					String subject = GlobalConstants.emailSubject;
 					
-					List<String> failureFiles = new ArrayList<>();
+					List<String> failureFiles = missingFiles.get(depart);
 					List<String> successFiles=transferedFiles.get(depart);
-					
-					failureFiles.add("yash.txt");
-					failureFiles.add("yash.txt");
-					failureFiles.add("yash.txt");
-					failureFiles.add("yash.txt");
 					
 					String body = templates.filesBody(failureFiles,successFiles, GlobalConstants.batchDate,ifConnectionIssue);
 					
@@ -52,15 +47,15 @@ public class Emails {
 							null, subject, body , toEmail};
 					
 					System.out.printf("%s %s %s",toEmail,subject,body);
-//					try {
-//						MailSenderController.main(args);
-//						
-//						System.out.println("Sucessfully created email for "+depart);
-//						log.info("Sucessfully created email for "+depart);
-//					} catch (Exception e) {
-//						System.out.println("error occured while mailing "+e.getMessage());
-//						log.info("error occured while mailing "+e.getMessage());
-//					}
+					try {
+						MailSenderController.main(args);
+						
+						System.out.println("Sucessfully created email for "+depart);
+						log.info("Sucessfully created email for "+depart);
+					} catch (Exception e) {
+						System.out.println("error occured while mailing "+e.getMessage());
+						log.info("error occured while mailing "+e.getMessage());
+					}
 				}
 				catch(Exception e) {
 					log.error(e);

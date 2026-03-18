@@ -47,7 +47,7 @@ public class ApplicationRunner implements CommandLineRunner {
 	Emails emails;
 
 	@Autowired
-	FileTransferService File_Transfer_Test;
+	FileTransferService File_Transfer;
 	
 	@Autowired
 	NASConnection nasConnection;
@@ -184,8 +184,8 @@ public class ApplicationRunner implements CommandLineRunner {
 
 			ChannelSftp sftp = null;
 
-			Session session = null;
-			DiskShare share = null;
+//			Session session = null;
+//			DiskShare share = null;
 			
 			String currentConnectionCode=entry.getKey();
 
@@ -195,18 +195,18 @@ public class ApplicationRunner implements CommandLineRunner {
 			} else {
 				return;
 			}
-			session = nasConnection.connect();
-
-			log.info("Department execution started:" + department);
-			System.out.println("Department execution started:" + department);
-
-			try {
-				share = (DiskShare) session.connectShare(entry.getValue().get(0).getShare());
-			} catch (Exception e) {
-				System.out.println("Share " + entry.getValue().get(0).getShare() + " is not able to connect");
-				log.info("Share " + entry.getValue().get(0).getShare() + " is not able to connect");
-				emails.connectionIssue();
-			}
+//			session = nasConnection.connect();
+//
+//			log.info("Department execution started:" + department);
+//			System.out.println("Department execution started:" + department);
+//
+//			try {
+//				share = (DiskShare) session.connectShare(entry.getValue().get(0).getShare());
+//			} catch (Exception e) {
+//				System.out.println("Share " + entry.getValue().get(0).getShare() + " is not able to connect");
+//				log.info("Share " + entry.getValue().get(0).getShare() + " is not able to connect");
+//				emails.connectionIssue();
+//			}
 
 			for (FileConfig record : entry.getValue()) {
 
@@ -219,7 +219,7 @@ public class ApplicationRunner implements CommandLineRunner {
 				System.out.println("Transfering file " + fileName);
 				log.info("Transfering file " + fileName);
 				try {
-					File_Transfer_Test.transfer(currentConnectionCode, sftp, fileName, record.getSource(), record.getDestination(),
+					File_Transfer.transfer(currentConnectionCode, sftp, fileName, record.getSource(), record.getDestination(),
 							department, missingFiles, transferedFiles);
 
 				} catch (Exception e) {
@@ -227,15 +227,13 @@ public class ApplicationRunner implements CommandLineRunner {
 					log.error(e);
 
 					sftp = sftpConnection.connect(currentConnectionCode);
-					session = nasConnection.connect();
-					share = (DiskShare) session.connectShare(record.getShare());
 				}
 			}
 			String triggerFolder = prop.getProperty("trigger.folder." + department);
 
 			try {
 				if (triggerFolder != null) {
-					Trigger.makeTriggerFile(share, triggerFolder, entry.getKey());
+					Trigger.makeTriggerFile( triggerFolder, entry.getKey());
 					System.out.println("Sucessfully created trigger file for " + department);
 					log.info("Sucessfully created trigger file for " + department);
 				} else {
@@ -246,14 +244,12 @@ public class ApplicationRunner implements CommandLineRunner {
 				log.info("Cannot create trigger file for department " + department);
 				e.printStackTrace();
 			} finally {
-				try {
-					share.close();
-					session.close();
+				
+//					share.close();
+//					session.close();
 					sftp.disconnect();
 					log.info("Every session is closed");
-				} catch (IOException e) {
-					log.error("Error while closing sessions");
-				}
+				
 			}
 		}
 		emails.filesNotFound(missingFiles, transferedFiles, department, false);

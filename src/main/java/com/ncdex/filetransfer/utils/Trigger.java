@@ -1,5 +1,8 @@
 package com.ncdex.filetransfer.utils;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 
 import javax.management.RuntimeErrorException;
@@ -19,34 +22,55 @@ import com.ncdex.filetransfer.constants.GlobalConstants;
 
 public class Trigger {
 	private static final Logger log = LogManager.getLogger(Trigger.class);
+	
+	private static String MOUNT_POINT = null;
 
 
-public static void makeTriggerFile(DiskShare share, String triggerFolder, String sftpServer) throws Exception {
-        try {
-        	
-            if (triggerFolder.startsWith("\\") || triggerFolder.startsWith("/")) {
-                triggerFolder = triggerFolder.replaceFirst("^[\\\\/]+", "");
-            }
-            
-            ensureDirectoryChain(share, triggerFolder);
 
-            String triggerFileName = "Trigger_" + GlobalConstants.batchDate + "_"+sftpServer+".trigger";
-            String smbTriggerPath = triggerFolder + "\\" + triggerFileName;
-            
-            try (File triggerFile = share.openFile(
-                    smbTriggerPath,
-                    EnumSet.of(AccessMask.GENERIC_WRITE, AccessMask.FILE_READ_ATTRIBUTES),
-                    EnumSet.of(FileAttributes.FILE_ATTRIBUTE_NORMAL),
-                    SMB2ShareAccess.ALL,
-                    SMB2CreateDisposition.FILE_OVERWRITE_IF,
-                    null)) {
-                
-                triggerFile.write(new byte[0], 0);
-                log.info("Trigger file created at: {}\\{}", triggerFolder, triggerFileName);
-            }
-        } finally {
-            share.close();
-        }
+		public static void makeTriggerFile( String triggerFolder, String sftpServer) throws Exception {
+//        try {
+//        	
+//            if (triggerFolder.startsWith("\\") || triggerFolder.startsWith("/")) {
+//                triggerFolder = triggerFolder.replaceFirst("^[\\\\/]+", "");
+//            }
+//            
+//            ensureDirectoryChain(share, triggerFolder);
+//
+//            String triggerFileName = "Trigger_" + GlobalConstants.batchDate + "_"+sftpServer+".trigger";
+//            String smbTriggerPath = triggerFolder + "\\" + triggerFileName;
+//            
+//            try (File triggerFile = share.openFile(
+//                    smbTriggerPath,
+//                    EnumSet.of(AccessMask.GENERIC_WRITE, AccessMask.FILE_READ_ATTRIBUTES),
+//                    EnumSet.of(FileAttributes.FILE_ATTRIBUTE_NORMAL),
+//                    SMB2ShareAccess.ALL,
+//                    SMB2CreateDisposition.FILE_OVERWRITE_IF,
+//                    null)) {
+//                
+//                triggerFile.write(new byte[0], 0);
+//                log.info("Trigger file created at: {}\\{}", triggerFolder, triggerFileName);
+//            }
+//        } finally {
+//            share.close();
+//        }
+			
+			MOUNT_POINT=GlobalConstants.mount_point;
+			
+			Path rootMount = Paths.get(MOUNT_POINT);
+		    if (!Files.exists(rootMount) || !Files.isDirectory(rootMount)) {
+		        log.error("CRITICAL: Mount point {} is missing or not a directory!", MOUNT_POINT);
+		        throw new Exception("Mount point is missing");
+		    }
+		    
+		    Path triggerDir = Paths.get(MOUNT_POINT, triggerFolder);
+		    
+		    Files.createDirectories(triggerDir);
+		    
+		    String triggerFileName = "Trigger_" + GlobalConstants.batchDate + "_"+sftpServer+".trigger";
+		    Path triggerFilePath = triggerDir.resolve(triggerFileName);
+		    
+		    Files.createFile(triggerFilePath);
+	        log.info("Trigger file created successfully: {}", triggerFilePath);
     }
 
 
