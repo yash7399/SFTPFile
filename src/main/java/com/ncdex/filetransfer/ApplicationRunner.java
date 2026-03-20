@@ -1,14 +1,10 @@
 package com.ncdex.filetransfer;
 
-import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.*;
 
 import javax.management.RuntimeErrorException;
@@ -20,11 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import com.hierynomus.smbj.session.Session;
-import com.hierynomus.smbj.share.DiskShare;
 import com.jcraft.jsch.ChannelSftp;
 import com.ncdex.filetransfer.config.FileConfig;
-import com.ncdex.filetransfer.connections.NASConnection;
 import com.ncdex.filetransfer.connections.SFTPConnection;
 import com.ncdex.filetransfer.constants.GlobalConstants;
 import com.ncdex.filetransfer.emails.Emails;
@@ -35,224 +28,244 @@ import com.ncdex.filetransfer.utils.Utils;
 @Component
 public class ApplicationRunner implements CommandLineRunner {
 
-	private static final Logger log = LogManager.getLogger(ApplicationRunner.class);
+    private static final Logger log = LogManager.getLogger(ApplicationRunner.class);
 
-	private static String batchDate;
-//	private static String configPath;
+    private static String batchDate;
 
-	@Autowired
-	Utils util;
+    @Autowired Utils          util;
+    @Autowired Emails         emails;
+    @Autowired SFTPConnection sftpConnection;
+    @Autowired DownloadService   downloadService;
+    @Autowired NASUploadService  nasUploadService;
 
-	@Autowired
-	Emails emails;
+    // Shared state — use ConcurrentHashMap with synchronizedList values
+    // (see DownloadService / NASUploadService which wrap lists with Collections.synchronizedList)
+    private final static ConcurrentMap<String, List<String>> missingFiles    = new ConcurrentHashMap<>();
+    private final static ConcurrentMap<String, List<String>> transferedFiles = new ConcurrentHashMap<>();
+    private static List<String> departments = new ArrayList<>();
 
-	@Autowired
-	FileTransferService File_Transfer;
-	
-	@Autowired
-	NASConnection nasConnection;
-	
-	
-	@Autowired
-	SFTPConnection sftpConnection;
+    public static String                              getBatchDate()      { return batchDate; }
+    public static ConcurrentMap<String, List<String>> getMissingFiles()   { return missingFiles; }
+    public static ConcurrentMap<String, List<String>> getTransferedFiles(){ return transferedFiles; }
+    public static List<String>                        getDepartments()    { return departments; }
 
-	private final static ConcurrentMap<String, List<String>> missingFiles = new ConcurrentHashMap<>();
+    // -------------------------------------------------------------------------
+    // Entry point
+    // -------------------------------------------------------------------------
 
-	private final static ConcurrentMap<String, List<String>> transferedFiles = new ConcurrentHashMap<>();
+    @Override
+    public void run(String... args) {
 
-	private static List<String> departments = new ArrayList();
+        if (args.length < 2) {
+            System.exit(1);
+        }
 
-	public static String getBatchDate() {
-		return batchDate;
-	}
+        batchDate = args[0];
+        String connectionCode = args[1];
 
-	public static ConcurrentMap<String, List<String>> getMissingFiles() {
-		return missingFiles;
-	}
+        // Resolve config path
+        String configpath = null;
+        for (String arg : args) {
+            if (arg.startsWith("--spring.config.location=")) {
+                configpath = arg.split("=", 2)[1];
+                break;
+            }
+        }
+        if (configpath == null) {
+            System.out.println("NO config path");
+            System.exit(1);
+        }
 
-	public static ConcurrentMap<String, List<String>> getTransferedFiles() {
-		return transferedFiles;
-	}
+        Prop.init(configpath);
 
-	public static List<String> getDepartments() {
-		return departments;
-	}
-	
-	
+        // Configure log4j2
+        Path log4jPath = Paths.get(Prop.getProp().getProperty("path.log4j2"));
+        if (!Files.exists(log4jPath)) {
+            throw new RuntimeErrorException(null, "Log4j2.xml not found: " + log4jPath);
+        }
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
+        context.setConfigLocation(log4jPath.toUri());
 
-	@Override
-	public void run(String... args) {
+        log.info("*********** APPLICATION STARTED ***********");
 
-		if (args.length < 2) {
-			System.exit(1);
-		}
+        int noOfThreads = GlobalConstants.no_of_threads > 0 ? GlobalConstants.no_of_threads : 2;
 
-		this.batchDate = args[0];
+        try {
+            Map<String, Map<String, List<FileConfig>>> departmentFiles = util.getDepartmentDetails();
+            if (departmentFiles == null) {
+                log.error("Failed to load department details. Shutting down.");
+                System.exit(1);
+            }
 
-		String connectionCode = args[1];
+            for (String dept : departmentFiles.keySet()) {
+                departments.add(dept);
+            }
 
-		String configpath = null;
+            // ----------------------------------------------------------------
+            // Phase 1 — download all files from SFTP to local temp
+            // Collect all DownloadedFile objects into a thread-safe list
+            // ----------------------------------------------------------------
+            log.info("*** PHASE 1 START — downloading all files from SFTP ***");
 
-		for (String arg : args) {
-			if (arg.startsWith("--spring.config.location=")) {
-				configpath = arg.split("=", 2)[1];
-				System.out.println(configpath);
-				break;
-			}
+            // One SFTP channel per thread. We use a simple pool keyed by connectionCode.
+            // Each task gets its own channel via the submit lambda.
+            List<Future<List<DownloadedFile>>> downloadFutures = new ArrayList<>();
+            ExecutorService phase1Pool = Executors.newFixedThreadPool(noOfThreads);
 
-		}
+            for (Map.Entry<String, Map<String, List<FileConfig>>> deptEntry : departmentFiles.entrySet()) {
+                String department = deptEntry.getKey();
+                Map<String, List<FileConfig>> connections = deptEntry.getValue();
 
-		if (configpath == null) {
-			System.out.print("NO config path");
-			System.exit(1);
-		}
+                for (Map.Entry<String, List<FileConfig>> connEntry : connections.entrySet()) {
+                    String currentConnectionCode = connEntry.getKey();
+                    List<FileConfig> records     = connEntry.getValue();
 
-		Prop.init(configpath);
-		Properties prop = Prop.getProp();
+                    if (!connectionCode.equals("00") && !connectionCode.equals(currentConnectionCode)) {
+                        continue;
+                    }
 
-		Path path = Paths.get(prop.getProperty("path.log4j2"));
+                    Future<List<DownloadedFile>> future = phase1Pool.submit(() ->
+                            downloadBatch(currentConnectionCode, department, records, args));
+                    downloadFutures.add(future);
+                }
+            }
 
-		if (!Files.exists(path)) {
-			throw new RuntimeErrorException(null, "Log4j2.xml file does not exists " + path);
-		}
-		LoggerContext context = (LoggerContext) LogManager.getContext(false);
+            phase1Pool.shutdown();
+            phase1Pool.awaitTermination(2, TimeUnit.HOURS);
 
-		URI configUri = Path.of(prop.getProperty("path.log4j2")).toUri();
+            // Collect all successfully downloaded files (barrier point)
+            List<DownloadedFile> allDownloaded = new ArrayList<>();
+            for (Future<List<DownloadedFile>> f : downloadFutures) {
+                try {
+                    allDownloaded.addAll(f.get());
+                } catch (ExecutionException e) {
+                    log.error("Phase 1 task threw an exception: {}", e.getCause().getMessage());
+                }
+            }
 
-		context.setConfigLocation(configUri);
+            log.info("*** PHASE 1 COMPLETE — {} files downloaded, starting Phase 2 ***", allDownloaded.size());
 
-		log.info("*********** APPLICATION STARTED ***********");
-		System.out.println("*********** APPLICATION STARTED ***********");
+            // ----------------------------------------------------------------
+            // Phase 2 — move all downloaded files from local temp to NAS
+            // ----------------------------------------------------------------
+            log.info("*** PHASE 2 START — uploading files to NAS ***");
 
-		int noOfThreads;
-		if (GlobalConstants.no_of_threads == 0) {
-			noOfThreads = 2;
-			log.info("Give no of threads by default taking 2");
-		} else {
-			noOfThreads = GlobalConstants.no_of_threads;
-		}
-		ExecutorService threadPool = Executors.newFixedThreadPool(noOfThreads);
+            ExecutorService phase2Pool = Executors.newFixedThreadPool(noOfThreads);
+            List<Future<?>> uploadFutures = new ArrayList<>();
 
-		try {
+            for (DownloadedFile file : allDownloaded) {
+                Future<?> future = phase2Pool.submit(() ->
+                        nasUploadService.upload(file, missingFiles, transferedFiles));
+                uploadFutures.add(future);
+            }
 
-			Map<String, Map<String, List<FileConfig>>> departmentFiles = util.getDepartmentDetails();
+            phase2Pool.shutdown();
+            phase2Pool.awaitTermination(2, TimeUnit.HOURS);
 
-			if (departmentFiles == null) {
-				log.info("There is error in getting file details. Shutting down the application");
-				System.exit(1);
-			}
+            // Wait for all uploads to finish
+            for (Future<?> f : uploadFutures) {
+                try {
+                    f.get();
+                } catch (ExecutionException e) {
+                    log.error("Phase 2 task threw an exception: {}", e.getCause().getMessage());
+                }
+            }
 
-			for (Map.Entry<String, Map<String, List<FileConfig>>> entry : departmentFiles.entrySet()) {
-				departments.add(entry.getKey());
-			}
+            log.info("*** PHASE 2 COMPLETE ***");
 
-			for (Map.Entry<String, Map<String, List<FileConfig>>> entry : departmentFiles.entrySet()) {
+            // ----------------------------------------------------------------
+            // Trigger files and emails — after both phases done
+            // ----------------------------------------------------------------
+            for (Map.Entry<String, Map<String, List<FileConfig>>> deptEntry : departmentFiles.entrySet()) {
+                String department = deptEntry.getKey();
+                Map<String, List<FileConfig>> connections = deptEntry.getValue();
 
-				String department = entry.getKey();
-				Map<String, List<FileConfig>> records = entry.getValue();
+                for (Map.Entry<String, List<FileConfig>> connEntry : connections.entrySet()) {
+                    String currentConnectionCode = connEntry.getKey();
+                    if (!connectionCode.equals("00") && !connectionCode.equals(currentConnectionCode)) continue;
 
-				threadPool.submit(() -> processDepartment(connectionCode, department, records, args));
+                    String triggerFolder = Prop.getProp().getProperty("trigger.folder." + department);
+                    if (triggerFolder != null) {
+                        try {
+                            Trigger.makeTriggerFile(triggerFolder, currentConnectionCode);
+                            log.info("Trigger file created for {}", department);
+                        } catch (Exception e) {
+                            log.error("Could not create trigger file for {}: {}", department, e.getMessage());
+                        }
+                    }
+                }
+                emails.filesNotFound(missingFiles, transferedFiles, department, false);
+            }
 
-			}
+            log.info("*********** APPLICATION FINISHED ***********");
+            System.exit(0); // success
 
-			threadPool.shutdown();
+        } catch (Exception e) {
+            log.error("Unexpected error", e);
+            emails.connectionIssue();
+            System.exit(1);
+        }
+    }
 
-			while (!threadPool.awaitTermination(5, TimeUnit.MINUTES)) {
-				log.info("Waiting for thread for ending task");
-			}
+    // -------------------------------------------------------------------------
+    // Phase 1 task — runs inside a thread pool thread
+    // Opens its own SFTP channel, downloads all files for one connection batch.
+    // Returns the list of DownloadedFile objects for Phase 2.
+    // -------------------------------------------------------------------------
 
-			log.info("*********** APPLICATION FINISHED ***********");
+    private List<DownloadedFile> downloadBatch(String currentConnectionCode,
+                                                String department,
+                                                List<FileConfig> records,
+                                                String... args) {
 
-			System.exit(1);
+        List<DownloadedFile> downloaded = new ArrayList<>();
 
-		} catch (Exception e) {
+        ChannelSftp sftp = sftpConnection.connect(currentConnectionCode);
+        if (sftp == null) {
+            log.error("Phase 1 | Could not connect to SFTP for connection {}", currentConnectionCode);
+            // Mark all files in this batch as missing
+            for (FileConfig record : records) {
+                missingFiles.computeIfAbsent(department,
+                        k -> Collections.synchronizedList(new ArrayList<>()))
+                        .add(record.getFilename());
+            }
+            return downloaded;
+        }
 
-			System.err.println(" UNEXPECTED ERROR: " + e.getMessage());
-			log.error("Unexpected error", e);
+        try {
+            for (FileConfig record : records) {
+                String fileName = util.getFileNameWithDate(record.getFilename(), record.getTime(), args[0]);
 
-			emails.connectionIssue();
-			System.exit(1);
-		}
-	}
+                // String equality check fixed: use .equals() not ==
+                if (fileName.equals(record.getFilename()) &&
+                        !record.getFilename().contains("DDMMYYYY") &&
+                        !record.getFilename().contains("DD-MON-YYYY")) {
+                    log.warn("Phase 1 | Date substitution did not occur for {}", record.getFilename());
+                }
 
-	private void processDepartment(String connectionCode, String department, Map<String, List<FileConfig>> connections,
-			String... args) {
+                log.info("Phase 1 | Queuing download: {}", fileName);
+                try {
+                    List<DownloadedFile> result = downloadService.download(
+                            sftp, fileName, record.getSource(), record.getDestination(),
+                            department, missingFiles);
+                    downloaded.addAll(result);
+                } catch (Exception e) {
+                    log.error("Phase 1 | Error processing {}: {}", fileName, e.getMessage());
+                    // Reconnect and continue with remaining files
+                    sftp = sftpConnection.connect(currentConnectionCode);
+                    if (sftp == null) {
+                        log.error("Phase 1 | Reconnect failed for {}. Stopping batch.", currentConnectionCode);
+                        break;
+                    }
+                }
+            }
+        } finally {
+            if (sftp != null && sftp.isConnected()) {
+                sftp.disconnect();
+                log.info("Phase 1 | SFTP disconnected for connection {}", currentConnectionCode);
+            }
+        }
 
-		Properties prop = Prop.getProp();
-
-		for (Map.Entry<String, List<FileConfig>> entry : connections.entrySet()) {
-
-			ChannelSftp sftp = null;
-
-//			Session session = null;
-//			DiskShare share = null;
-			
-			String currentConnectionCode=entry.getKey();
-
-			if (connectionCode.equals("00") || connectionCode.equals(currentConnectionCode)) {
-
-				sftp = sftpConnection.connect(currentConnectionCode);
-			} else {
-				return;
-			}
-//			session = nasConnection.connect();
-//
-//			log.info("Department execution started:" + department);
-//			System.out.println("Department execution started:" + department);
-//
-//			try {
-//				share = (DiskShare) session.connectShare(entry.getValue().get(0).getShare());
-//			} catch (Exception e) {
-//				System.out.println("Share " + entry.getValue().get(0).getShare() + " is not able to connect");
-//				log.info("Share " + entry.getValue().get(0).getShare() + " is not able to connect");
-//				emails.connectionIssue();
-//			}
-
-			for (FileConfig record : entry.getValue()) {
-
-				String fileName = util.getFileNameWithDate(record.getFilename(), record.getTime(), args[0]);
-
-				if (fileName == record.getFilename()) {
-					log.info("Cannot update Date in file name ");
-					continue;
-				}
-				System.out.println("Transfering file " + fileName);
-				log.info("Transfering file " + fileName);
-				try {
-					File_Transfer.transfer(currentConnectionCode, sftp, fileName, record.getSource(), record.getDestination(),
-							department, missingFiles, transferedFiles);
-
-				} catch (Exception e) {
-
-					log.error(e);
-
-					sftp = sftpConnection.connect(currentConnectionCode);
-				}
-			}
-			String triggerFolder = prop.getProperty("trigger.folder." + department);
-
-			try {
-				if (triggerFolder != null) {
-					Trigger.makeTriggerFile( triggerFolder, entry.getKey());
-					System.out.println("Sucessfully created trigger file for " + department);
-					log.info("Sucessfully created trigger file for " + department);
-				} else {
-					log.info("Trigger folder is null. Cannot create trigger file ");
-				}
-			} catch (Exception e) {
-				System.out.println("Cannot create trigger file for department " + department);
-				log.info("Cannot create trigger file for department " + department);
-				e.printStackTrace();
-			} finally {
-				
-//					share.close();
-//					session.close();
-					sftp.disconnect();
-					log.info("Every session is closed");
-				
-			}
-		}
-		emails.filesNotFound(missingFiles, transferedFiles, department, false);
-
-	}
+        return downloaded;
+    }
 }
